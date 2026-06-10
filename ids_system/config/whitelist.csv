@@ -1,0 +1,4 @@
+ip,mac,descripcion,fecha_alta
+192.168.1.1,aa:bb:cc:dd:ee:01,Router Principal,2025-01-01
+192.168.1.2,aa:bb:cc:dd:ee:02,Servidor DNS,2025-01-01
+192.168.1.10,aa:bb:cc:dd:ee:10,PC Administrador,2025-01-01

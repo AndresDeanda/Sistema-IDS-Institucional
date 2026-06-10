@@ -1,0 +1,133 @@
+[2026-06-06 00:03:38] [INFO    ] [MainThread] ============================================================
+[2026-06-06 00:03:38] [INFO    ] [MainThread] IDS iniciado: 2026-06-06 00:03:38
+[2026-06-06 00:03:38] [INFO    ] [MainThread] Interfaz de red: 
+[2026-06-06 00:03:38] [INFO    ] [MainThread] ============================================================
+[2026-06-06 00:03:38] [INFO    ] [MainThread] [ALERTAS] Módulo iniciado. Destino: administrador@empresa.com
+[2026-06-06 00:03:38] [WARNING ] [MainThread] [WHITELIST] Archivo no encontrado: config\whitelist.csv
+[2026-06-06 00:03:38] [WARNING ] [MainThread] [WHITELIST] Se creará una lista vacía. Todos los hosts generarán alertas.
+[2026-06-06 00:03:38] [INFO    ] [MainThread] [WHITELIST] Archivo de ejemplo creado: config\whitelist.csv
+[2026-06-06 00:03:38] [INFO    ] [MainThread] [WHITELIST] Cargada: 3 IPs, 3 MACs autorizadas.
+[2026-06-06 00:03:38] [WARNING ] [MainThread] [THREAT] Blacklist no encontrada: config\blacklist.txt
+[2026-06-06 00:03:38] [INFO    ] [MainThread] [THREAT] Blacklist de ejemplo creada: config\blacklist.txt
+[2026-06-06 00:03:38] [INFO    ] [MainThread] [THREAT] Lista negra cargada: 6 IPs peligrosas.
+[2026-06-06 00:03:38] [INFO    ] [MainThread] [MONITOR] Bitácora iniciada: reports\bitacora_20260606.csv
+[2026-06-06 00:03:38] [INFO    ] [MainThread] [MONITOR] Módulo de monitoreo iniciado. Reportes en: reports
+[2026-06-06 00:03:38] [INFO    ] [MainThread] [CAPTURA] Interfaces disponibles: ['{3796D8F8-1941-4BF6-9BD3-D5FF74164CCF}', '{A5FDC9A6-BABD-4A87-8192-9CDFEC7671C4}', '{4AA1BF2D-A2E4-478E-BF61-E7D060308AB3}', '{22F93E91-F6BA-473F-A829-B3AE8ED254D7}', '{A9AA9D55-A212-44CC-8158-0836130E7201}', '{8D451706-7341-40CE-990F-C79C55B880A8}', '{93C72AFB-84D0-49BB-B96A-6761CB5BD650}', '{83743ACE-450A-4C14-A1D7-00703A8FD7AF}', '{33802A0B-9361-48F7-BFE5-4AC51F55FD50}']
+[2026-06-06 00:03:38] [INFO    ] [MainThread] Captura de paquetes iniciada.
+[2026-06-06 00:03:38] [INFO    ] [MainThread] [CAPTURA] Sniffing en interfaz: {3796D8F8-1941-4BF6-9BD3-D5FF74164CCF}
+[2026-06-06 00:03:38] [CRITICAL] [MainThread] Error crítico en el IDS: Error opening adapter: El nombre de archivo, el nombre de directorio o la sintaxis de la etiqueta del volumen no son correctos. (123)
+Traceback (most recent call last):
+  File "C:\Users\erika\Documents\8voSemestre\ciberSeguridad\testIDS\ids_system\ids_main.py", line 115, in main
+    captura.iniciar()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\erika\Documents\8voSemestre\ciberSeguridad\testIDS\ids_system\modules\packet_capture.py", line 92, in iniciar
+    sniff(
+    ~~~~~^
+        iface  = self.interfaz,
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        stop_filter = lambda _: not self._activo
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\erika\AppData\Roaming\Python\Python313\site-packages\scapy\sendrecv.py", line 1311, in sniff
+    sniffer._run(*args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\erika\AppData\Roaming\Python\Python313\site-packages\scapy\sendrecv.py", line 1171, in _run
+    sniff_sockets[_RL2(iface)(type=ETH_P_ALL, iface=iface,
+                  ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                              **karg)] = iface
+                              ^^^^^^^
+  File "C:\Users\erika\AppData\Roaming\Python\Python313\site-packages\scapy\arch\libpcap.py", line 481, in __init__
+    fd = open_pcap(
+        iface, MTU, self.promisc, 100,
+        monitor=monitor
+    )
+  File "C:\Users\erika\AppData\Roaming\Python\Python313\site-packages\scapy\arch\windows\__init__.py", line 770, in open_pcap
+    return _orig_open_pcap(iface_network_name, *args, **kargs)
+  File "C:\Users\erika\AppData\Roaming\Python\Python313\site-packages\scapy\arch\libpcap.py", line 338, in __init__
+    raise OSError(error)
+OSError: Error opening adapter: El nombre de archivo, el nombre de directorio o la sintaxis de la etiqueta del volumen no son correctos. (123)
+[2026-06-06 00:15:47] [INFO    ] [MainThread] ============================================================
+[2026-06-06 00:15:47] [INFO    ] [MainThread] IDS iniciado: 2026-06-06 00:15:47
+[2026-06-06 00:15:47] [INFO    ] [MainThread] Interfaz de red: 
+[2026-06-06 00:15:47] [INFO    ] [MainThread] ============================================================
+[2026-06-06 00:15:47] [INFO    ] [MainThread] [ALERTAS] Módulo iniciado. Destino: administrador@empresa.com
+[2026-06-06 00:15:47] [INFO    ] [MainThread] [WHITELIST] Cargada: 3 IPs, 3 MACs autorizadas.
+[2026-06-06 00:15:47] [INFO    ] [MainThread] [THREAT] Lista negra cargada: 6 IPs peligrosas.
+[2026-06-06 00:15:47] [INFO    ] [MainThread] [MONITOR] Módulo de monitoreo iniciado. Reportes en: reports
+[2026-06-06 00:15:47] [INFO    ] [MainThread] [CAPTURA] Interfaz activa detectada vía Scapy: ZeroTier One [633e31d8a2c5e6c7]
+[2026-06-06 00:15:47] [INFO    ] [MainThread] Captura de paquetes iniciada.
+[2026-06-06 00:15:47] [INFO    ] [MainThread] [CAPTURA] Sniffing en interfaz: ZeroTier One [633e31d8a2c5e6c7]
+[2026-06-06 00:22:22] [INFO    ] [MainThread] ============================================================
+[2026-06-06 00:22:22] [INFO    ] [MainThread] IDS iniciado: 2026-06-06 00:22:22
+[2026-06-06 00:22:22] [INFO    ] [MainThread] Interfaz de red: Intel(R) Wireless-AC 9560 160MHz
+[2026-06-06 00:22:22] [INFO    ] [MainThread] ============================================================
+[2026-06-06 00:22:22] [INFO    ] [MainThread] [ALERTAS] Módulo iniciado. Destino: al270712@edu.uaa.mx
+[2026-06-06 00:22:22] [INFO    ] [MainThread] [WHITELIST] Cargada: 3 IPs, 3 MACs autorizadas.
+[2026-06-06 00:22:22] [INFO    ] [MainThread] [THREAT] Lista negra cargada: 6 IPs peligrosas.
+[2026-06-06 00:22:22] [INFO    ] [MainThread] [MONITOR] Módulo de monitoreo iniciado. Reportes en: reports
+[2026-06-06 00:22:22] [INFO    ] [MainThread] Captura de paquetes iniciada.
+[2026-06-06 00:22:22] [INFO    ] [MainThread] [CAPTURA] Sniffing en interfaz: Intel(R) Wireless-AC 9560 160MHz
+[2026-06-06 00:22:22] [WARNING ] [MainThread] [WHITELIST] INTRUSIÓN DETECTADA | IP: 192.168.1.105 | MAC: 9c:fc:e8:94:a7:a0 | Protocolo: TCP
+[2026-06-06 00:22:22] [DEBUG   ] [MainThread] [ALERTAS] Correo encolado: [IDS ALERTA] Dispositivo NO autorizado detectado - 192.168.1...
+[2026-06-06 00:22:24] [INFO    ] [AletrasEmailWorker] [ALERTAS] ✓ Correo enviado: [IDS ALERTA] Dispositivo NO autorizado detectado - 192.168.1.105
+[2026-06-06 00:22:37] [WARNING ] [MainThread] [WHITELIST] INTRUSIÓN DETECTADA | IP: 192.168.1.254 | MAC: 28:53:4e:71:5e:c3 | Protocolo: ARP
+[2026-06-06 00:22:37] [DEBUG   ] [MainThread] [ALERTAS] Correo encolado: [IDS ALERTA] Dispositivo NO autorizado detectado - 192.168.1...
+[2026-06-06 00:22:39] [INFO    ] [AletrasEmailWorker] [ALERTAS] ✓ Correo enviado: [IDS ALERTA] Dispositivo NO autorizado detectado - 192.168.1.254
+[2026-06-06 00:24:43] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → proxy.individual.githubcopilot.com (DNS)
+[2026-06-06 00:24:43] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → proxy.individual.githubcopilot.com
+[2026-06-06 00:24:44] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → proxy.individual.githubcopilot.com (DNS)
+[2026-06-06 00:24:44] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → proxy.individual.githubcopilot.com
+[2026-06-06 00:24:44] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → proxy.individual.githubcopilot.com (DNS)
+[2026-06-06 00:24:44] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → proxy.individual.githubcopilot.com
+[2026-06-06 00:24:44] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → proxy.individual.githubcopilot.com (DNS)
+[2026-06-06 00:24:44] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → proxy.individual.githubcopilot.com
+[2026-06-06 00:24:51] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → api.individual.githubcopilot.com (DNS)
+[2026-06-06 00:24:51] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → api.individual.githubcopilot.com
+[2026-06-06 00:24:52] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → api.individual.githubcopilot.com (DNS)
+[2026-06-06 00:24:52] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → api.individual.githubcopilot.com
+[2026-06-06 00:25:54] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → mobile.events.data.microsoft.com (DNS)
+[2026-06-06 00:25:54] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → mobile.events.data.microsoft.com
+[2026-06-06 00:25:56] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → mobile.events.data.microsoft.com (DNS)
+[2026-06-06 00:25:56] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → mobile.events.data.microsoft.com
+[2026-06-06 00:25:56] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → mobile.events.data.microsoft.com (DNS)
+[2026-06-06 00:25:56] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → mobile.events.data.microsoft.com
+[2026-06-06 00:25:56] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → mobile.events.data.microsoft.com (DNS)
+[2026-06-06 00:25:56] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → mobile.events.data.microsoft.com
+[2026-06-06 00:25:56] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → mobile.events.data.microsoft.com (DNS)
+[2026-06-06 00:25:56] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → mobile.events.data.microsoft.com
+[2026-06-06 00:25:56] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → mobile.events.data.microsoft.com (DNS)
+[2026-06-06 00:25:56] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → mobile.events.data.microsoft.com
+[2026-06-06 00:26:20] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → main.vscode-cdn.net (DNS)
+[2026-06-06 00:26:20] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → main.vscode-cdn.net
+[2026-06-06 00:26:20] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → main.vscode-cdn.net (DNS)
+[2026-06-06 00:26:20] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → main.vscode-cdn.net
+[2026-06-06 00:26:30] [WARNING ] [MainThread] [WHITELIST] INTRUSIÓN DETECTADA | IP: 192.168.1.114 | MAC: 02:db:56:c9:16:93 | Protocolo: ARP
+[2026-06-06 00:26:30] [DEBUG   ] [MainThread] [ALERTAS] Correo encolado: [IDS ALERTA] Dispositivo NO autorizado detectado - 192.168.1...
+[2026-06-06 00:26:32] [INFO    ] [AletrasEmailWorker] [ALERTAS] ✓ Correo enviado: [IDS ALERTA] Dispositivo NO autorizado detectado - 192.168.1.114
+[2026-06-06 00:27:35] [WARNING ] [MainThread] [WHITELIST] INTRUSIÓN DETECTADA | IP: 192.168.1.156 | MAC: 70:70:aa:a3:84:e1 | Protocolo: UDP
+[2026-06-06 00:27:35] [DEBUG   ] [MainThread] [ALERTAS] Correo encolado: [IDS ALERTA] Dispositivo NO autorizado detectado - 192.168.1...
+[2026-06-06 00:27:37] [INFO    ] [AletrasEmailWorker] [ALERTAS] ✓ Correo enviado: [IDS ALERTA] Dispositivo NO autorizado detectado - 192.168.1.156
+[2026-06-06 00:28:54] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → mobile.events.data.microsoft.com (DNS)
+[2026-06-06 00:28:54] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → mobile.events.data.microsoft.com
+[2026-06-06 00:28:54] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → mobile.events.data.microsoft.com (DNS)
+[2026-06-06 00:28:54] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → mobile.events.data.microsoft.com
+[2026-06-06 00:28:55] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → mobile.events.data.microsoft.com (DNS)
+[2026-06-06 00:28:55] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → mobile.events.data.microsoft.com
+[2026-06-06 00:28:55] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → mobile.events.data.microsoft.com (DNS)
+[2026-06-06 00:28:55] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → mobile.events.data.microsoft.com
+[2026-06-06 00:28:56] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → mobile.events.data.microsoft.com (DNS)
+[2026-06-06 00:28:56] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → mobile.events.data.microsoft.com
+[2026-06-06 00:28:56] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → mobile.events.data.microsoft.com (DNS)
+[2026-06-06 00:28:56] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → mobile.events.data.microsoft.com
+[2026-06-06 00:31:21] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → main.vscode-cdn.net (DNS)
+[2026-06-06 00:31:21] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → main.vscode-cdn.net
+[2026-06-06 00:31:22] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → main.vscode-cdn.net (DNS)
+[2026-06-06 00:31:22] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → main.vscode-cdn.net
+[2026-06-06 00:31:22] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → main.vscode-cdn.net (DNS)
+[2026-06-06 00:31:22] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → main.vscode-cdn.net
+[2026-06-06 00:31:23] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → main.vscode-cdn.net (DNS)
+[2026-06-06 00:31:23] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → main.vscode-cdn.net
+[2026-06-06 00:31:23] [DEBUG   ] [MainThread] [MONITOR] 192.168.1.254 → main.vscode-cdn.net (DNS)
+[2026-06-06 00:31:23] [DEBUG   ] [MainThread] [CAPTURA] DNS: 192.168.1.254 → main.vscode-cdn.net

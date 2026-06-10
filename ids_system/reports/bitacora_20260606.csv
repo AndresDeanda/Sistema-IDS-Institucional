@@ -1,0 +1,26 @@
+timestamp,ip_origen,dominio,protocolo
+2026-06-06 00:24:43,192.168.1.254,proxy.individual.githubcopilot.com,DNS
+2026-06-06 00:24:44,192.168.1.254,proxy.individual.githubcopilot.com,DNS
+2026-06-06 00:24:44,192.168.1.254,proxy.individual.githubcopilot.com,DNS
+2026-06-06 00:24:44,192.168.1.254,proxy.individual.githubcopilot.com,DNS
+2026-06-06 00:24:51,192.168.1.254,api.individual.githubcopilot.com,DNS
+2026-06-06 00:24:52,192.168.1.254,api.individual.githubcopilot.com,DNS
+2026-06-06 00:25:54,192.168.1.254,mobile.events.data.microsoft.com,DNS
+2026-06-06 00:25:56,192.168.1.254,mobile.events.data.microsoft.com,DNS
+2026-06-06 00:25:56,192.168.1.254,mobile.events.data.microsoft.com,DNS
+2026-06-06 00:25:56,192.168.1.254,mobile.events.data.microsoft.com,DNS
+2026-06-06 00:25:56,192.168.1.254,mobile.events.data.microsoft.com,DNS
+2026-06-06 00:25:56,192.168.1.254,mobile.events.data.microsoft.com,DNS
+2026-06-06 00:26:20,192.168.1.254,main.vscode-cdn.net,DNS
+2026-06-06 00:26:20,192.168.1.254,main.vscode-cdn.net,DNS
+2026-06-06 00:28:54,192.168.1.254,mobile.events.data.microsoft.com,DNS
+2026-06-06 00:28:54,192.168.1.254,mobile.events.data.microsoft.com,DNS
+2026-06-06 00:28:55,192.168.1.254,mobile.events.data.microsoft.com,DNS
+2026-06-06 00:28:55,192.168.1.254,mobile.events.data.microsoft.com,DNS
+2026-06-06 00:28:56,192.168.1.254,mobile.events.data.microsoft.com,DNS
+2026-06-06 00:28:56,192.168.1.254,mobile.events.data.microsoft.com,DNS
+2026-06-06 00:31:21,192.168.1.254,main.vscode-cdn.net,DNS
+2026-06-06 00:31:22,192.168.1.254,main.vscode-cdn.net,DNS
+2026-06-06 00:31:22,192.168.1.254,main.vscode-cdn.net,DNS
+2026-06-06 00:31:23,192.168.1.254,main.vscode-cdn.net,DNS
+2026-06-06 00:31:23,192.168.1.254,main.vscode-cdn.net,DNS
