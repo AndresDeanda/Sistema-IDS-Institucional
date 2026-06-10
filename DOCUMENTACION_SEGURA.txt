@@ -1046,7 +1046,6 @@ El IDS debe utilizarse únicamente con autorización. El objetivo del sistema es
 * Documentación oficial de Python.
 * Documentación de Scapy.
 * Documentación técnica del proyecto IDS Institucional.
-* OpenAI. ChatGPT. Herramienta de apoyo para redacción, organización y documentación técnica del proyecto.
 
 ===============================================================================
 
