@@ -1,8 +1,7 @@
-# DOCUMENTACIÓN SEGURA
+DOCUMENTACIÓN SEGURA
+Sistema IDS Institucional
 
-# Sistema IDS Institucional
-
-## ÍNDICE GENERAL
+ÍNDICE GENERAL
 
 1. Arquitectura general del sistema.
 2. Modelo OSI aplicado al IDS.
@@ -10,116 +9,122 @@
 4. Estructura general del código.
 5. Protección de credenciales.
 6. Módulos del sistema.
-   6.1 [MOD-001] `ids_main.py` - Módulo principal del IDS.
-   6.2 [MOD-002] `config_loader.py` - Carga de configuración.
-   6.3 [MOD-003] `whitelist.py` - Validación de lista blanca.
-   6.4 [MOD-004] `packet_capture.py` - Captura de paquetes.
-   6.5 [MOD-005] `traffic_monitor.py` - Monitoreo de tráfico y dominios.
-   6.6 [MOD-006] `threat_intel.py` - Lista negra de IPs peligrosas.
-   6.7 [MOD-007] `email_alerter.py` - Envío de alertas por correo.
-   6.8 [MOD-008] `forensics.py` - Automatización forense Abuse/Whois.
-   6.9 [MOD-009] `logger.py` - Registro de eventos y bitácoras.
+   6.1 [MOD-001] ids_main.py - Módulo principal del IDS.
+   6.2 [MOD-002] config_loader.py - Carga de configuración.
+   6.3 [MOD-003] whitelist.py - Validación de lista blanca.
+   6.4 [MOD-004] packet_capture.py - Captura de paquetes.
+   6.5 [MOD-005] traffic_monitor.py - Monitoreo de tráfico y dominios.
+   6.6 [MOD-006] threat_intel.py - Lista negra de IPs peligrosas.
+   6.7 [MOD-007] email_alerter.py - Envío de alertas por correo.
+   6.8 [MOD-008] forensics.py - Automatización forense Abuse/Whois.
+   6.9 [MOD-009] logger.py - Registro de eventos y bitácoras.
 7. Análisis jurídico del monitoreo.
 8. Política de monitoreo y tratamiento de bitácoras.
-9. Notas técnicas adicionales.
+9. Prerrequisitos del sistema.
+10. Notas técnicas adicionales.
 
----
+===============================================================================
 
-# 1. ARQUITECTURA GENERAL DEL SISTEMA
+1. ARQUITECTURA GENERAL DEL SISTEMA
 
-El Sistema IDS Institucional está desarrollado en Python y funciona como una herramienta de monitoreo de red. Su objetivo principal es capturar tráfico, validar dispositivos autorizados, detectar actividad sospechosa y generar alertas al administrador cuando se presenta un evento relevante.
+El Sistema IDS Institucional es una herramienta desarrollada en Python para el monitoreo de tráfico de red dentro de una infraestructura controlada. Su objetivo principal es detectar eventos relacionados con seguridad, como dispositivos no autorizados, conexiones hacia direcciones IP peligrosas, consultas a dominios y generación de alertas para el administrador.
 
-El sistema se encuentra organizado por módulos, lo que permite separar responsabilidades y facilitar su mantenimiento. El archivo principal `ids_main.py` funciona como punto de entrada del programa y se encarga de inicializar los demás componentes del IDS.
+El sistema funciona mediante una arquitectura modular. Cada módulo realiza una tarea específica, lo que permite que el programa sea más fácil de mantener, revisar y modificar. El archivo principal ids_main.py se encarga de inicializar todos los módulos y coordinar la ejecución general del IDS.
 
 Componentes principales:
 
-* `ids_main.py`: archivo principal que inicia el sistema.
-* `config_loader.py`: carga las variables de configuración desde el archivo `.env`.
-* `packet_capture.py`: captura paquetes de red mediante Scapy.
-* `whitelist.py`: valida IPs y MACs autorizadas.
-* `traffic_monitor.py`: registra tráfico y consultas DNS en bitácoras.
-* `threat_intel.py`: compara conexiones con IPs peligrosas.
-* `forensics.py`: realiza consultas forenses mediante Abuse/Whois.
-* `email_alerter.py`: envía alertas por correo electrónico.
-* `logger.py`: genera registros del sistema.
+* ids_main.py: archivo principal que inicia el sistema.
+* config_loader.py: carga las variables de configuración desde el archivo .env.
+* whitelist.py: valida direcciones IP y MAC autorizadas.
+* packet_capture.py: captura paquetes de red mediante Scapy.
+* traffic_monitor.py: registra actividad de tráfico, dominios y consultas DNS.
+* threat_intel.py: compara direcciones IP con una lista negra.
+* email_alerter.py: envía alertas por correo electrónico.
+* forensics.py: realiza consultas de apoyo forense sobre IPs sospechosas.
+* logger.py: genera registros del sistema y bitácoras de ejecución.
+* config/whitelist.csv: almacena dispositivos autorizados.
+* config/blacklist.txt: almacena direcciones IP consideradas peligrosas.
+* env.example: plantilla de variables de configuración sin credenciales reales.
 
-La arquitectura del sistema sigue una lógica modular, donde cada archivo cumple una función específica. Esto evita concentrar toda la lógica en un solo archivo y facilita identificar errores, modificar configuraciones o ampliar funcionalidades.
+El sistema está diseñado para ejecutarse en un entorno autorizado, como una red institucional, laboratorio académico o infraestructura interna donde exista permiso para realizar monitoreo de tráfico.
 
----
+===============================================================================
 
-# 2. MODELO OSI APLICADO AL IDS
+2. MODELO OSI APLICADO AL IDS
 
-El IDS trabaja principalmente con información de diferentes capas del modelo OSI:
+El IDS analiza información relacionada con varias capas del modelo OSI. Esto permite identificar eventos de seguridad desde diferentes niveles de comunicación en red.
 
-| Capa OSI                 | Aplicación dentro del IDS                                     |
-| ------------------------ | ------------------------------------------------------------- |
-| Capa 2 - Enlace de datos | Validación de direcciones MAC mediante lista blanca.          |
-| Capa 3 - Red             | Validación de direcciones IP internas y externas.             |
-| Capa 4 - Transporte      | Identificación de protocolos como TCP y UDP.                  |
-| Capa 7 - Aplicación      | Registro de dominios consultados mediante tráfico DNS o HTTP. |
+┌──────────────────────────────┬──────────────────────────────────────────────────────────────┐
+│ Capa OSI                     │ Aplicación dentro del IDS                                    │
+├──────────────────────────────┼──────────────────────────────────────────────────────────────┤
+│ Capa 2 - Enlace de datos     │ Validación de direcciones MAC mediante lista blanca.         │
+├──────────────────────────────┼──────────────────────────────────────────────────────────────┤
+│ Capa 3 - Red                 │ Validación de direcciones IP internas y externas.            │
+├──────────────────────────────┼──────────────────────────────────────────────────────────────┤
+│ Capa 4 - Transporte          │ Identificación de tráfico TCP y UDP.                         │
+├──────────────────────────────┼──────────────────────────────────────────────────────────────┤
+│ Capa 7 - Aplicación          │ Registro de dominios consultados mediante DNS o HTTP.        │
+└──────────────────────────────┴──────────────────────────────────────────────────────────────┘
 
-El módulo de lista blanca se relaciona principalmente con las capas 2 y 3, ya que analiza direcciones MAC e IP. El módulo de monitoreo de sitios trabaja con información de capa 7 al registrar dominios consultados. El módulo de IPs peligrosas analiza conexiones hacia direcciones externas que pueden representar un riesgo de seguridad.
+La validación de la lista blanca se relaciona principalmente con las capas 2 y 3, debido a que compara direcciones MAC e IP. El monitoreo de sitios se relaciona con la capa 7, ya que registra dominios consultados. El módulo de threat intelligence trabaja con direcciones IP externas para detectar posibles conexiones riesgosas.
 
----
+===============================================================================
 
-# 3. DIAGRAMA DE FLUJO DEL SISTEMA
+3. DIAGRAMA DE FLUJO DEL SISTEMA
 
-```text
 INICIO
-  |
-  v
+|
+v
 Cargar configuración desde archivo .env
-  |
-  v
+|
+v
 Inicializar logger del sistema
-  |
-  v
+|
+v
 Inicializar módulo de alertas por correo
-  |
-  v
+|
+v
 Cargar lista blanca de IPs/MACs autorizadas
-  |
-  v
+|
+v
 Cargar lista negra de IPs peligrosas
-  |
-  v
+|
+v
 Inicializar monitoreo de tráfico y bitácoras
-  |
-  v
+|
+v
 Inicializar módulo forense Abuse/Whois
-  |
-  v
+|
+v
 Iniciar captura de paquetes en la interfaz configurada
-  |
-  v
+|
+v
 ¿Paquete detectado?
-  |
-  +--> Validar IP/MAC en lista blanca
-  |       |
-  |       +--> Si NO está autorizado: generar alerta
-  |
-  +--> Revisar dominio o consulta DNS
-  |       |
-  |       +--> Registrar en bitácora
-  |
-  +--> Comparar IP externa con lista negra
-          |
-          +--> Si es peligrosa: generar alerta y consulta forense
-  |
-  v
+|
++--> Validar IP/MAC en lista blanca
+|       |
+|       +--> Si NO está autorizado: generar alerta
+|
++--> Revisar dominio o consulta DNS
+|       |
+|       +--> Registrar en bitácora
+|
++--> Comparar IP externa con lista negra
+|
++--> Si es peligrosa: generar alerta y consulta forense
+|
+v
 Continuar monitoreo hasta que el usuario detenga el sistema
-  |
-  v
+|
+v
 FIN
-```
 
----
+===============================================================================
 
-# 4. ESTRUCTURA GENERAL DEL CÓDIGO
+4. ESTRUCTURA GENERAL DEL CÓDIGO
 
-La carpeta principal del proyecto contiene los siguientes elementos:
+La carpeta principal del proyecto contiene la siguiente estructura:
 
-```text
 ids_system/
 │
 ├── ids_main.py
@@ -132,250 +137,918 @@ ids_system/
 │   └── blacklist.txt
 │
 └── modules/
-    ├── config_loader.py
-    ├── email_alerter.py
-    ├── forensics.py
-    ├── logger.py
-    ├── packet_capture.py
-    ├── threat_intel.py
-    ├── traffic_monitor.py
-    ├── whitelist.py
-    └── __init__.py
-```
+├── config_loader.py
+├── email_alerter.py
+├── forensics.py
+├── logger.py
+├── packet_capture.py
+├── threat_intel.py
+├── traffic_monitor.py
+├── whitelist.py
+└── **init**.py
 
-El archivo `requirements.txt` contiene las dependencias necesarias para ejecutar el sistema. El archivo `env.example` sirve como plantilla para crear el archivo `.env`, donde se colocan las variables de configuración. Los archivos `whitelist.csv` y `blacklist.txt` almacenan las listas de dispositivos autorizados e IPs peligrosas.
+Descripción general:
 
----
+* ids_main.py: ejecuta el sistema y conecta todos los módulos.
+* requirements.txt: contiene las dependencias necesarias para ejecutar el IDS.
+* instalar_windows.bat: archivo de apoyo para instalación en Windows.
+* env.example: plantilla de configuración sin datos sensibles.
+* config/whitelist.csv: archivo donde se registran dispositivos autorizados.
+* config/blacklist.txt: archivo donde se registran IPs peligrosas.
+* modules/: carpeta donde se encuentran los módulos internos del IDS.
 
-# 5. PROTECCIÓN DE CREDENCIALES
+No deben subirse al repositorio archivos generados automáticamente como:
 
-El sistema no debe contener contraseñas escritas directamente dentro del código fuente. Para proteger las credenciales, se utiliza un archivo `.env`, el cual no debe subirse a repositorios públicos.
+* .env
+* logs/
+* reports/
+* **pycache**/
+* archivos .pyc
 
-El archivo `ids_main.py` no contiene contraseñas hardcoded. En su lugar, obtiene los valores de configuración mediante la función `cargar_configuracion()`.
+Estos archivos pueden contener datos de ejecución, bitácoras, rutas locales o información que no es necesaria para revisar el código fuente.
 
-Ejemplo de variables requeridas:
+===============================================================================
 
-```env
+5. PROTECCIÓN DE CREDENCIALES
+
+El código fuente documentado no contiene contraseñas escritas directamente dentro del programa. Para proteger las credenciales se utiliza un archivo .env, el cual debe permanecer únicamente en el equipo donde se ejecuta el sistema.
+
+El archivo .env almacena datos de configuración como:
+
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=correo_remitente@gmail.com
+SMTP_USER=[correo_remitente@gmail.com](mailto:correo_remitente@gmail.com)
 SMTP_PASSWORD=contraseña_de_aplicacion
-ADMIN_EMAIL=administrador@dominio.com
+ADMIN_EMAIL=[administrador@dominio.com](mailto:administrador@dominio.com)
 NETWORK_INTERFACE=Wi-Fi
 WHITELIST_FILE=config/whitelist.csv
 BLACKLIST_FILE=config/blacklist.txt
 LOG_DIR=logs
 REPORT_DIR=reports
 DEBUG_MODE=true
+
+Medidas de protección aplicadas:
+
+* El archivo .env no debe subirse al repositorio.
+* En GitHub solo se debe publicar env.example como plantilla.
+* Las credenciales SMTP se cargan mediante variables de entorno.
+* La contraseña del correo no se escribe dentro del código fuente.
+* El correo administrador se puede modificar sin cambiar el código.
+* Las rutas de configuración pueden ajustarse desde .env.
+* Si se usa Gmail, se recomienda usar contraseña de aplicación y no la contraseña principal de la cuenta.
+* Los archivos logs y reports no deben publicarse si contienen datos de pruebas reales.
+
+Ejemplo de uso seguro:
+
+1. Descargar el proyecto desde GitHub.
+2. Copiar env.example.
+3. Renombrar la copia como .env.
+4. Colocar las credenciales reales únicamente en el equipo local.
+5. Ejecutar el IDS.
+
+PSEUDOCÓDIGO DE PROTECCIÓN DE CREDENCIALES:
+
+INICIO
+cargar archivo .env
+validar que existan variables obligatorias
+SI falta SMTP_PASSWORD ENTONCES
+mostrar error de configuración
+detener ejecución
+FIN SI
+
+```
+usar SMTP_USER y SMTP_PASSWORD solamente en memoria
+NO imprimir contraseña en pantalla
+NO guardar contraseña en logs
 ```
 
-El archivo `.env` debe permanecer únicamente en el equipo donde se ejecuta el IDS. En GitHub solo debe subirse una plantilla como `env.example`, sin correos reales, contraseñas o claves privadas.
+FIN
 
-Medidas aplicadas:
+===============================================================================
 
-* Las credenciales SMTP se cargan desde variables de entorno.
-* El correo del administrador puede modificarse sin cambiar el código fuente.
-* Las rutas de lista blanca, lista negra, logs y reportes se configuran desde `.env`.
-* El archivo `.env` no debe publicarse en GitHub.
-* Para Gmail se recomienda usar contraseña de aplicación y no la contraseña principal de la cuenta.
+6. MÓDULOS DEL SISTEMA
 
----
+───────────────────────────────────────────────────────────────────────────────
+[MOD-001] ARCHIVO: ids_main.py
+───────────────────────────────────────────────────────────────────────────────
 
-# 6. MÓDULOS DEL SISTEMA
+PROPÓSITO:
 
-───────────────────────────────────────────────────────────────
+El archivo ids_main.py es el módulo principal del Sistema IDS Institucional. Su función es iniciar el programa, cargar la configuración, inicializar los módulos internos y comenzar la captura de tráfico de red.
 
-## [MOD-001] ARCHIVO: `ids_main.py`
+Este archivo funciona como orquestador del sistema porque conecta los módulos de configuración, alertas, listas blancas, monitoreo, threat intelligence, forense y captura de paquetes.
 
-───────────────────────────────────────────────────────────────
+IMPORTACIONES PRINCIPALES:
 
-## PROPÓSITO
+* os: permite identificar el sistema operativo y validar privilegios.
+* sys: permite finalizar la ejecución cuando ocurre un error.
+* time: puede utilizarse para control de tiempos.
+* threading: permite preparar ejecución concurrente.
+* logging: permite manejar niveles de registro.
+* datetime: registra fecha y hora de inicio del IDS.
 
-El archivo `ids_main.py` es el módulo principal del Sistema IDS Institucional. Su función es iniciar el programa, cargar la configuración, inicializar los módulos internos y comenzar la captura de tráfico de red.
+Módulos internos importados:
 
-Este archivo actúa como orquestador del sistema, ya que conecta los módulos de configuración, alertas, listas blancas, monitoreo, threat intelligence, forense y captura de paquetes.
+* cargar_configuracion
+* ModuloListaBlanca
+* ModuloMonitoreoTrafico
+* ModuloThreatIntelligence
+* ModuloForense
+* ModuloCapturaPaquetes
+* ModuloAlertas
+* configurar_logger
 
-## IMPORTACIONES PRINCIPALES
-
-```python
-import os
-import sys
-import time
-import threading
-import logging
-from datetime import datetime
-```
-
-Estas librerías permiten interactuar con el sistema operativo, controlar la salida del programa, manejar registros y obtener la fecha/hora de inicio del IDS.
-
-También importa los módulos internos:
-
-```python
-from modules.config_loader import cargar_configuracion
-from modules.whitelist import ModuloListaBlanca
-from modules.traffic_monitor import ModuloMonitoreoTrafico
-from modules.threat_intel import ModuloThreatIntelligence
-from modules.forensics import ModuloForense
-from modules.packet_capture import ModuloCapturaPaquetes
-from modules.email_alerter import ModuloAlertas
-from modules.logger import configurar_logger
-```
-
-Estos módulos internos forman la base funcional del IDS.
-
-## FUNCIONAMIENTO GENERAL
+FUNCIONAMIENTO:
 
 1. Muestra el banner inicial del sistema.
-2. Carga la configuración desde el archivo `.env`.
+2. Carga la configuración desde .env.
 3. Inicializa el logger principal.
 4. Inicializa el módulo de alertas por correo.
-5. Carga la lista blanca de dispositivos autorizados.
-6. Carga la lista negra de IPs peligrosas.
-7. Inicializa el monitoreo de tráfico y reportes.
+5. Inicializa el módulo de lista blanca.
+6. Inicializa el módulo de threat intelligence.
+7. Inicializa el módulo de monitoreo de tráfico.
 8. Inicializa el módulo forense.
-9. Inicia la captura de paquetes.
-10. Permite detener el sistema con `Ctrl + C`.
-11. Registra errores críticos si ocurre una falla durante la ejecución.
+9. Inicializa el módulo de captura de paquetes.
+10. Inicia la captura de tráfico.
+11. Permite detener el IDS con Ctrl + C.
+12. Registra errores críticos si ocurre una falla.
 
-## SUBÍNDICES EN EL CÓDIGO
+SUBÍNDICES EN EL CÓDIGO:
 
-| Subíndice  | Sección                     | Descripción                                                                 |
-| ---------- | --------------------------- | --------------------------------------------------------------------------- |
-| [MAIN-001] | Banner de inicio            | Presenta el nombre, versión y licencia del IDS.                             |
-| [MAIN-002] | Función `main()`            | Orquesta la ejecución general del sistema.                                  |
-| [MAIN-003] | Carga de configuración      | Lee los valores definidos en `.env`.                                        |
-| [MAIN-004] | Inicialización de logger    | Configura los registros del sistema.                                        |
-| [MAIN-005] | Inicialización de alertas   | Configura el envío de correos SMTP.                                         |
-| [MAIN-006] | Inicialización de módulos   | Crea los objetos de lista blanca, threat intelligence, monitoreo y forense. |
-| [MAIN-007] | Captura de paquetes         | Inicia la escucha de tráfico en la interfaz configurada.                    |
-| [MAIN-008] | Manejo de interrupción      | Permite detener el IDS con `Ctrl + C`.                                      |
-| [MAIN-009] | Verificación de privilegios | Comprueba si el programa se ejecuta como administrador o root.              |
+[MAIN-001] Banner de inicio
+Presenta el nombre del sistema, versión, licencia y equipo de desarrollo.
 
-## PSEUDOCÓDIGO
+[MAIN-002] Función main()
+Orquesta la ejecución general del IDS.
 
-```text
+[MAIN-003] Carga de configuración
+Llama a cargar_configuracion() para obtener variables del archivo .env.
+
+[MAIN-004] Inicialización de logger
+Configura el registro principal del sistema mediante configurar_logger().
+
+[MAIN-005] Inicialización de alertas
+Crea un objeto ModuloAlertas usando SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD y ADMIN_EMAIL.
+
+[MAIN-006] Inicialización de módulos de análisis
+Crea los objetos ModuloListaBlanca, ModuloThreatIntelligence, ModuloMonitoreoTrafico y ModuloForense.
+
+[MAIN-007] Inicialización de captura
+Crea el objeto ModuloCapturaPaquetes usando la interfaz configurada.
+
+[MAIN-008] Manejo de interrupción
+Detiene el IDS correctamente cuando el usuario presiona Ctrl + C.
+
+[MAIN-009] Verificación de privilegios
+Verifica si el programa se ejecuta como administrador en Windows o como root en Linux.
+
+PSEUDOCÓDIGO:
+
 INICIO ids_main.py
 
-Mostrar banner del sistema
+```
+mostrar banner del sistema
 
-Cargar configuración desde archivo .env
+cargar configuración desde .env
 
-Configurar logger principal
+configurar logger principal
 
-Crear módulo de alertas por correo usando:
-    SMTP_HOST
-    SMTP_PORT
-    SMTP_USER
-    SMTP_PASSWORD
-    ADMIN_EMAIL
+crear módulo de alertas por correo
 
-Crear módulo de lista blanca usando whitelist.csv
+crear módulo de lista blanca
 
-Crear módulo de threat intelligence usando blacklist.txt
+crear módulo de threat intelligence
 
-Crear módulo de monitoreo de tráfico usando carpeta reports
+crear módulo de monitoreo de tráfico
 
-Crear módulo forense para consultas Abuse/Whois
+crear módulo forense
 
-Crear módulo de captura de paquetes usando:
-    interfaz configurada
-    lista blanca
-    threat intelligence
-    monitoreo de tráfico
-    módulo forense
+crear módulo de captura de paquetes
 
-Mostrar mensaje de inicio correcto
+mostrar mensajes de inicio correcto
 
-INTENTAR:
+INTENTAR
     iniciar captura de paquetes
-
-SI el usuario presiona Ctrl + C:
+SI el usuario presiona Ctrl + C
     detener captura
     guardar bitácoras
     finalizar programa
-
-SI ocurre error crítico:
+SI ocurre error crítico
     registrar error
-    mostrar mensaje
+    mostrar error en pantalla
     finalizar programa
+FIN SI
+```
 
 FIN
-```
 
-## EJEMPLO DE USO
+EJEMPLO DE USO:
 
-Para ejecutar el IDS en Windows:
+En Windows:
 
-```powershell
 python ids_main.py
-```
 
-Para ejecutar el IDS en Linux:
+En Linux:
 
-```bash
 sudo python3 ids_main.py
-```
 
-Si el programa se inicia correctamente, debe mostrar mensajes similares a:
+SEGURIDAD EN ESTE MÓDULO:
 
-```text
-Configuración cargada desde: .env
-IDS iniciado
-Interfaz de red: Wi-Fi
-Todos los módulos inicializados correctamente
-Iniciando captura de tráfico
-```
+El módulo principal no contiene contraseñas en texto plano. Las credenciales se reciben desde el diccionario config, cargado previamente desde el archivo .env.
 
-## SEGURIDAD EN ESTE MÓDULO
+Ejemplo del fragmento relevante:
 
-El módulo principal no contiene contraseñas escritas directamente en el código. Las credenciales del servidor SMTP se reciben mediante el diccionario `config`, cargado desde el archivo `.env`.
-
-Fragmento relevante:
-
-```python
 alertas = ModuloAlertas(
-    smtp_host     = config["SMTP_HOST"],
-    smtp_port     = int(config.get("SMTP_PORT", 587)),
-    smtp_user     = config["SMTP_USER"],
-    smtp_password = config["SMTP_PASSWORD"],
-    admin_email   = config["ADMIN_EMAIL"],
-    logger        = log
+smtp_host     = config["SMTP_HOST"],
+smtp_port     = int(config.get("SMTP_PORT", 587)),
+smtp_user     = config["SMTP_USER"],
+smtp_password = config["SMTP_PASSWORD"],
+admin_email   = config["ADMIN_EMAIL"],
+logger        = log
 )
+
+Este diseño permite cambiar las credenciales sin modificar el código fuente.
+
+LIMITACIONES:
+
+* Si el archivo .env no existe, el sistema no puede cargar la configuración.
+* Si SMTP_PASSWORD está vacío, el módulo de correo puede fallar.
+* Si NETWORK_INTERFACE está mal escrito, la captura puede no iniciar.
+* Si no se ejecuta con permisos elevados, Scapy no podrá capturar paquetes.
+
+───────────────────────────────────────────────────────────────────────────────
+[MOD-002] ARCHIVO: config_loader.py
+───────────────────────────────────────────────────────────────────────────────
+
+PROPÓSITO:
+
+El módulo config_loader.py se encarga de cargar la configuración del sistema desde variables de entorno. Su función principal es evitar que los valores sensibles se escriban directamente dentro del código fuente.
+
+FUNCIONAMIENTO ESPERADO:
+
+1. Leer el archivo .env.
+2. Cargar variables como SMTP_HOST, SMTP_USER, SMTP_PASSWORD y ADMIN_EMAIL.
+3. Validar que las variables obligatorias existan.
+4. Devolver un diccionario de configuración.
+5. Detener la ejecución si faltan variables importantes.
+
+VARIABLES IMPORTANTES:
+
+* SMTP_HOST: servidor SMTP utilizado para enviar alertas.
+* SMTP_PORT: puerto del servidor SMTP.
+* SMTP_USER: correo remitente.
+* SMTP_PASSWORD: contraseña de aplicación o clave SMTP.
+* ADMIN_EMAIL: correo del administrador.
+* NETWORK_INTERFACE: interfaz de red a monitorear.
+* WHITELIST_FILE: ruta del archivo whitelist.csv.
+* BLACKLIST_FILE: ruta del archivo blacklist.txt.
+* LOG_DIR: carpeta de logs.
+* REPORT_DIR: carpeta de reportes.
+* DEBUG_MODE: modo de depuración.
+
+PSEUDOCÓDIGO:
+
+INICIO cargar_configuracion()
+
+```
+cargar archivo .env
+
+crear diccionario config
+
+leer SMTP_HOST
+leer SMTP_PORT
+leer SMTP_USER
+leer SMTP_PASSWORD
+leer ADMIN_EMAIL
+leer NETWORK_INTERFACE
+leer WHITELIST_FILE
+leer BLACKLIST_FILE
+leer LOG_DIR
+leer REPORT_DIR
+leer DEBUG_MODE
+
+verificar variables obligatorias
+
+SI falta una variable obligatoria ENTONCES
+    mostrar error
+    detener programa
+FIN SI
+
+retornar config
 ```
 
-Esto permite modificar credenciales y correos sin alterar el código fuente.
+FIN
 
-## VALIDACIÓN DE PRIVILEGIOS
+SEGURIDAD EN ESTE MÓDULO:
 
-El archivo principal valida si el programa tiene permisos suficientes para capturar tráfico de red.
+Este módulo es fundamental para proteger credenciales. En lugar de escribir la contraseña SMTP dentro de ids_main.py o email_alerter.py, el sistema la obtiene desde .env. Esto reduce el riesgo de publicar accidentalmente contraseñas en GitHub.
 
-En Windows verifica privilegios de administrador:
+───────────────────────────────────────────────────────────────────────────────
+[MOD-003] ARCHIVO: whitelist.py
+───────────────────────────────────────────────────────────────────────────────
 
-```python
-if os.name == "nt":
-    import ctypes
-    if not ctypes.windll.shell32.IsUserAnAdmin():
-        print("[ERROR] Este programa requiere privilegios de Administrador.")
-        sys.exit(1)
+PROPÓSITO:
+
+El módulo whitelist.py administra la lista blanca de dispositivos autorizados. Su objetivo es comparar las direcciones IP y MAC detectadas en la red contra el archivo config/whitelist.csv.
+
+FUNCIONAMIENTO:
+
+1. Cargar el archivo whitelist.csv.
+2. Leer las IPs y MACs autorizadas.
+3. Analizar los paquetes capturados.
+4. Extraer IP y MAC de origen cuando sea posible.
+5. Comparar esos valores contra la lista blanca.
+6. Si el dispositivo no está autorizado, generar una alerta.
+7. Registrar el evento en el logger.
+
+ARCHIVO DE CONFIGURACIÓN:
+
+config/whitelist.csv
+
+Ejemplo de estructura:
+
+ip,mac,descripcion
+192.168.1.10,AA:BB:CC:DD:EE:FF,Equipo autorizado
+192.168.1.20,11:22:33:44:55:66,Laptop administrativa
+
+PSEUDOCÓDIGO:
+
+INICIO ModuloListaBlanca
+
+```
+cargar archivo whitelist.csv
+
+PARA cada línea del archivo
+    obtener IP
+    obtener MAC
+    guardar dispositivo autorizado
+FIN PARA
+
+AL recibir paquete
+    extraer IP origen
+    extraer MAC origen
+
+    SI IP o MAC no está en lista blanca ENTONCES
+        registrar evento sospechoso
+        enviar alerta al administrador
+    SINO
+        permitir tráfico como autorizado
+    FIN SI
 ```
 
-En Linux verifica si se ejecuta como root:
+FIN
 
-```python
-else:
-    if os.geteuid() != 0:
-        print("[ERROR] Este programa requiere ejecutarse como root.")
-        print("        Usa: sudo python3 ids_main.py")
-        sys.exit(1)
+RELACIÓN CON MODELO OSI:
+
+* Capa 2: validación de dirección MAC.
+* Capa 3: validación de dirección IP.
+
+SEGURIDAD EN ESTE MÓDULO:
+
+La lista blanca ayuda a identificar dispositivos no autorizados dentro de la red. Esto permite detectar posibles conexiones ajenas a la infraestructura institucional.
+
+───────────────────────────────────────────────────────────────────────────────
+[MOD-004] ARCHIVO: packet_capture.py
+───────────────────────────────────────────────────────────────────────────────
+
+PROPÓSITO:
+
+El módulo packet_capture.py se encarga de capturar paquetes de red desde la interfaz configurada. Este módulo es la base operativa del IDS porque alimenta con paquetes a los demás módulos de análisis.
+
+FUNCIONAMIENTO:
+
+1. Recibe el nombre de la interfaz de red.
+2. Inicia la captura de paquetes.
+3. Envía cada paquete capturado a los módulos correspondientes.
+4. Permite detener la captura cuando el usuario finaliza el programa.
+5. Registra actividad mediante el logger.
+
+MÓDULOS QUE RECIBEN PAQUETES:
+
+* whitelist.py: valida IP/MAC.
+* threat_intel.py: revisa IPs peligrosas.
+* traffic_monitor.py: registra dominios y tráfico.
+* forensics.py: apoya en análisis de IPs sospechosas.
+
+PSEUDOCÓDIGO:
+
+INICIO ModuloCapturaPaquetes
+
+```
+recibir interfaz de red
+
+iniciar captura con Scapy
+
+PARA cada paquete capturado
+    enviar paquete a lista blanca
+    enviar paquete a threat intelligence
+    enviar paquete a monitoreo de tráfico
+
+    SI se detecta IP peligrosa ENTONCES
+        ejecutar análisis forense
+    FIN SI
+FIN PARA
+
+SI el usuario detiene el sistema
+    detener captura
+    guardar registros
+FIN SI
 ```
 
-Esto es necesario porque la captura de paquetes requiere permisos elevados.
+FIN
 
-## LIMITACIONES
+REQUISITOS DE EJECUCIÓN:
 
-* Si el archivo `.env` no está configurado correctamente, el sistema no puede iniciar todos sus módulos.
-* Si `SMTP_PASSWORD` está vacío, el módulo de alertas no podrá enviar correos.
-* Si la interfaz de red está mal escrita, el módulo de captura puede fallar.
-* Si no se ejecuta como administrador o root, el sistema no podrá capturar paquetes.
+* En Windows se requiere Npcap.
+* En Linux se requieren permisos de root.
+* En ambos casos se necesita seleccionar una interfaz de red válida.
 
----
+SEGURIDAD EN ESTE MÓDULO:
+
+La captura de paquetes debe realizarse únicamente en redes autorizadas. Su uso fuera de una infraestructura propia o institucional puede representar un problema legal y ético.
+
+───────────────────────────────────────────────────────────────────────────────
+[MOD-005] ARCHIVO: traffic_monitor.py
+───────────────────────────────────────────────────────────────────────────────
+
+PROPÓSITO:
+
+El módulo traffic_monitor.py registra actividad relevante del tráfico de red. Su función principal es generar bitácoras con información como fecha, hora, IP de origen, dominio consultado y protocolo utilizado.
+
+FUNCIONAMIENTO:
+
+1. Recibir paquetes capturados.
+2. Identificar consultas DNS o tráfico HTTP.
+3. Extraer el dominio consultado cuando sea posible.
+4. Registrar el evento en un archivo CSV.
+5. Guardar la bitácora dentro de la carpeta reports.
+
+FORMATO DE BITÁCORA:
+
+timestamp,ip_origen,dominio,protocolo
+2026-06-09 21:42:09,192.168.1.254,spclient.wg.spotify.com,DNS
+
+PSEUDOCÓDIGO:
+
+INICIO ModuloMonitoreoTrafico
+
+```
+crear archivo de bitácora con fecha actual
+
+AL recibir paquete
+    SI el paquete contiene consulta DNS ENTONCES
+        extraer dominio consultado
+        extraer IP origen
+        guardar evento en CSV
+    FIN SI
+
+    SI el paquete contiene información HTTP ENTONCES
+        extraer dominio o host
+        extraer IP origen
+        guardar evento en CSV
+    FIN SI
+```
+
+FIN
+
+RELACIÓN CON MODELO OSI:
+
+Este módulo trabaja principalmente con la capa 7, ya que registra dominios y consultas de aplicación.
+
+SEGURIDAD EN ESTE MÓDULO:
+
+Las bitácoras pueden contener información de navegación o actividad de red. Por esta razón deben protegerse, conservarse solo el tiempo necesario y consultarse únicamente por personal autorizado.
+
+───────────────────────────────────────────────────────────────────────────────
+[MOD-006] ARCHIVO: threat_intel.py
+───────────────────────────────────────────────────────────────────────────────
+
+PROPÓSITO:
+
+El módulo threat_intel.py compara direcciones IP detectadas en el tráfico contra una lista negra de IPs peligrosas. Esto permite identificar conexiones hacia destinos relacionados con malware, virus, ataques o comportamiento sospechoso.
+
+FUNCIONAMIENTO:
+
+1. Cargar el archivo config/blacklist.txt.
+2. Guardar las IPs peligrosas en memoria.
+3. Analizar IPs origen y destino de los paquetes.
+4. Comparar las IPs con la lista negra.
+5. Si se detecta coincidencia, generar alerta.
+6. Enviar información al módulo forense para ampliar el análisis.
+
+ARCHIVO DE CONFIGURACIÓN:
+
+config/blacklist.txt
+
+Ejemplo:
+
+8.8.8.8
+1.2.3.4
+185.220.101.1
+
+PSEUDOCÓDIGO:
+
+INICIO ModuloThreatIntelligence
+
+```
+cargar blacklist.txt
+
+PARA cada IP en el archivo
+    guardar IP peligrosa
+FIN PARA
+
+AL recibir paquete
+    extraer IP origen
+    extraer IP destino
+
+    SI IP origen o destino está en lista negra ENTONCES
+        registrar evento peligroso
+        enviar alerta al administrador
+        solicitar análisis forense
+    FIN SI
+```
+
+FIN
+
+SEGURIDAD EN ESTE MÓDULO:
+
+La lista negra permite detectar conexiones de riesgo. Sin embargo, una IP en lista negra no siempre confirma un ataque; debe interpretarse como indicador de posible riesgo que requiere revisión.
+
+───────────────────────────────────────────────────────────────────────────────
+[MOD-007] ARCHIVO: email_alerter.py
+───────────────────────────────────────────────────────────────────────────────
+
+PROPÓSITO:
+
+El módulo email_alerter.py se encarga de enviar alertas por correo electrónico al administrador cuando el IDS detecta eventos importantes.
+
+EVENTOS QUE PUEDEN GENERAR ALERTA:
+
+* Dispositivo no autorizado.
+* IP o MAC fuera de la lista blanca.
+* Conexión hacia IP peligrosa.
+* Resultado de análisis forense.
+* Error crítico del sistema.
+
+FUNCIONAMIENTO:
+
+1. Recibir configuración SMTP desde .env.
+2. Preparar mensaje de alerta.
+3. Conectar con el servidor SMTP.
+4. Enviar correo al administrador.
+5. Registrar si el envío fue exitoso o falló.
+
+PSEUDOCÓDIGO:
+
+INICIO ModuloAlertas
+
+```
+recibir SMTP_HOST
+recibir SMTP_PORT
+recibir SMTP_USER
+recibir SMTP_PASSWORD
+recibir ADMIN_EMAIL
+
+AL generar alerta
+    crear asunto del correo
+    crear cuerpo del mensaje
+    conectar con servidor SMTP
+    autenticar usuario
+    enviar correo al administrador
+    registrar resultado
+```
+
+FIN
+
+SEGURIDAD EN ESTE MÓDULO:
+
+Este módulo no debe contener contraseñas escritas directamente. La contraseña SMTP se recibe desde .env. Además, no se debe imprimir SMTP_PASSWORD en consola ni guardarse en archivos de log.
+
+───────────────────────────────────────────────────────────────────────────────
+[MOD-008] ARCHIVO: forensics.py
+───────────────────────────────────────────────────────────────────────────────
+
+PROPÓSITO:
+
+El módulo forensics.py realiza tareas de apoyo forense cuando se detecta una IP sospechosa. Su objetivo es obtener información adicional sobre la IP para apoyar al administrador en la toma de decisiones.
+
+FUNCIONAMIENTO:
+
+1. Recibir una IP sospechosa.
+2. Consultar información pública o servicios de reputación.
+3. Obtener datos como proveedor, país, reporte de abuso o contacto abuse.
+4. Generar un resumen para el administrador.
+5. Enviar el resultado al módulo de alertas.
+
+POSIBLES DATOS OBTENIDOS:
+
+* IP analizada.
+* Proveedor de servicios.
+* País o región aproximada.
+* Contacto abuse.
+* Nivel de riesgo.
+* Fecha de consulta.
+* Fuente de información.
+
+PSEUDOCÓDIGO:
+
+INICIO ModuloForense
+
+```
+recibir IP sospechosa
+
+consultar información de reputación o whois
+
+SI se obtiene información ENTONCES
+    construir reporte forense
+    enviar reporte al administrador
+SINO
+    registrar que no se obtuvo información
+FIN SI
+```
+
+FIN
+
+SEGURIDAD EN ESTE MÓDULO:
+
+El análisis forense debe usarse como apoyo informativo. La información obtenida sobre una IP no debe utilizarse para atacar, escanear o intervenir sistemas externos. Su finalidad es únicamente defensiva y de documentación del incidente.
+
+───────────────────────────────────────────────────────────────────────────────
+[MOD-009] ARCHIVO: logger.py
+───────────────────────────────────────────────────────────────────────────────
+
+PROPÓSITO:
+
+El módulo logger.py configura el sistema de registros del IDS. Permite guardar eventos importantes en consola y en archivos de log.
+
+FUNCIONAMIENTO:
+
+1. Recibir nombre del logger.
+2. Recibir ruta donde se guardarán logs.
+3. Recibir nivel de registro.
+4. Crear carpeta de logs si no existe.
+5. Registrar eventos informativos, advertencias, errores y eventos críticos.
+
+NIVELES DE LOG:
+
+* DEBUG: información detallada para pruebas.
+* INFO: eventos normales del sistema.
+* WARNING: eventos sospechosos o advertencias.
+* ERROR: errores de ejecución.
+* CRITICAL: fallas graves del sistema.
+
+PSEUDOCÓDIGO:
+
+INICIO configurar_logger
+
+```
+recibir nombre
+recibir ruta_log
+recibir nivel
+
+crear carpeta de logs si no existe
+
+configurar formato de fecha, nivel y mensaje
+
+configurar salida en consola
+
+configurar salida en archivo
+
+retornar logger
+```
+
+FIN
+
+SEGURIDAD EN ESTE MÓDULO:
+
+Los logs no deben almacenar contraseñas, claves de API ni información sensible innecesaria. También se recomienda no subir la carpeta logs al repositorio público.
+
+===============================================================================
+
+7. ANÁLISIS JURÍDICO DEL MONITOREO
+
+El monitoreo de red dentro de una organización puede considerarse legal siempre que se realice bajo autorización, con fines de seguridad, dentro de infraestructura propia o administrada por la institución, y con una política clara de uso aceptable de recursos tecnológicos.
+
+El IDS no debe utilizarse para interceptar información privada sin autorización ni para monitorear redes ajenas. Su finalidad debe limitarse a la protección de la infraestructura institucional, detección de incidentes y generación de bitácoras de seguridad.
+
+MARCO JURÍDICO GENERAL EN MÉXICO:
+
+1. Constitución Política de los Estados Unidos Mexicanos
+
+El artículo 16 reconoce la protección de datos personales y establece que las personas tienen derecho a la protección de su información. Por este motivo, cualquier monitoreo que pueda involucrar datos personales debe realizarse con límites, finalidad definida y medidas de protección.
+
+2. Ley Federal de Protección de Datos Personales en Posesión de los Particulares
+
+Esta ley es relevante cuando las bitácoras del IDS puedan contener datos que identifiquen o hagan identificable a una persona. Por ejemplo:
+
+* IP asignada a un usuario específico.
+* MAC vinculada a un dispositivo de una persona.
+* Correo electrónico del administrador.
+* Registros de navegación o dominios consultados.
+* Nombre del equipo o usuario asociado a una conexión.
+
+En caso de que la organización sea particular y almacene este tipo de datos, es necesario considerar principios como finalidad, consentimiento, proporcionalidad, seguridad y confidencialidad.
+
+3. Código Penal Federal
+
+El Código Penal Federal contempla conductas relacionadas con acceso ilícito a sistemas y equipos de informática. Por esta razón, el IDS debe utilizarse únicamente en sistemas propios, autorizados o institucionales, evitando cualquier uso en redes externas sin permiso.
+
+CRITERIO DE LEGALIDAD PARA EL PROYECTO:
+
+Para que el monitoreo sea aceptable dentro de una organización, se deben cumplir las siguientes condiciones:
+
+* La red monitoreada debe pertenecer a la institución o estar bajo su administración.
+* Los usuarios deben conocer que existe monitoreo con fines de seguridad.
+* El monitoreo debe limitarse a eventos técnicos necesarios.
+* Las bitácoras deben protegerse contra acceso no autorizado.
+* La información registrada debe usarse únicamente para seguridad informática.
+* Debe existir una política interna de uso aceptable.
+* Las bitácoras no deben publicarse en repositorios públicos.
+* El personal responsable debe tratar la información con confidencialidad.
+
+===============================================================================
+
+8. POLÍTICA DE MONITOREO Y TRATAMIENTO DE BITÁCORAS
+
+POLÍTICA DE USO Y MONITOREO DEL SISTEMA IDS INSTITUCIONAL
+
+1. Finalidad del monitoreo
+
+El Sistema IDS Institucional será utilizado únicamente para fines de seguridad informática, detección de dispositivos no autorizados, identificación de conexiones hacia IPs peligrosas, generación de alertas y registro de actividad técnica relevante dentro de la red institucional.
+
+2. Alcance
+
+El monitoreo aplicará únicamente sobre la infraestructura de red autorizada por la organización. No se permitirá el uso del IDS en redes externas, redes públicas, redes de terceros o sistemas donde no exista autorización expresa.
+
+3. Datos registrados
+
+El IDS podrá registrar los siguientes datos técnicos:
+
+* Fecha y hora del evento.
+* Dirección IP de origen.
+* Dirección MAC detectada.
+* Dominio consultado.
+* Protocolo utilizado.
+* Evento detectado.
+* Resultado de comparación con lista blanca o lista negra.
+* Información de apoyo forense sobre IPs sospechosas.
+
+4. Uso de la información
+
+La información registrada será utilizada únicamente para:
+
+* Analizar incidentes de seguridad.
+* Detectar dispositivos no autorizados.
+* Revisar tráfico sospechoso.
+* Generar reportes internos.
+* Apoyar la respuesta ante incidentes.
+
+5. Confidencialidad
+
+Las bitácoras generadas por el IDS deberán ser consultadas únicamente por personal autorizado. No deberán compartirse públicamente ni subirse a GitHub si contienen datos reales de usuarios, dispositivos o actividad de red.
+
+6. Conservación de bitácoras
+
+Las bitácoras deberán conservarse solo durante el tiempo necesario para cumplir con la finalidad de seguridad. Una vez que ya no sean requeridas, deberán eliminarse de forma segura.
+
+7. Seguridad de credenciales
+
+Las credenciales de correo, contraseñas SMTP y claves de API deberán almacenarse únicamente en el archivo .env local. No deberán escribirse en el código fuente ni publicarse en repositorios.
+
+8. Aviso a usuarios
+
+La organización deberá informar a los usuarios que la red puede ser monitoreada con fines de seguridad. Este aviso puede integrarse en una política de uso aceptable de recursos tecnológicos.
+
+9. Prohibiciones
+
+Queda prohibido:
+
+* Usar el IDS en redes ajenas sin autorización.
+* Capturar tráfico con fines distintos a seguridad.
+* Publicar bitácoras con datos reales.
+* Compartir contraseñas o claves de API.
+* Modificar el IDS para realizar ataques.
+* Usar la información para fines personales o no autorizados.
+
+10. Responsable del sistema
+
+El administrador de seguridad o responsable de TI será el encargado de configurar, ejecutar y revisar el IDS, así como proteger las bitácoras generadas.
+
+===============================================================================
+
+9. PRERREQUISITOS DEL SISTEMA
+
+SISTEMA OPERATIVO:
+
+El IDS puede ejecutarse en Windows o Linux. Para el proyecto se documentó principalmente su ejecución en Windows.
+
+REQUISITOS EN WINDOWS:
+
+* Windows 10 o Windows 11.
+* Python 3 instalado.
+* Npcap instalado.
+* PowerShell ejecutado como Administrador.
+* Conexión de red activa.
+* Archivo .env configurado.
+* Dependencias instaladas desde requirements.txt.
+
+REQUISITOS EN LINUX:
+
+* Distribución Linux compatible.
+* Python 3 instalado.
+* Permisos de root.
+* Dependencias instaladas.
+* Interfaz de red activa.
+* Archivo .env configurado.
+
+INSTALACIÓN DE DEPENDENCIAS:
+
+Desde la carpeta ids_system:
+
+pip install -r requirements.txt
+
+EJECUCIÓN EN WINDOWS:
+
+python ids_main.py
+
+EJECUCIÓN EN LINUX:
+
+sudo python3 ids_main.py
+
+CONFIGURACIÓN BÁSICA:
+
+1. Descargar o clonar el repositorio.
+2. Entrar a la carpeta ids_system.
+3. Instalar dependencias.
+4. Copiar env.example.
+5. Renombrar la copia como .env.
+6. Configurar SMTP_USER, SMTP_PASSWORD, ADMIN_EMAIL y NETWORK_INTERFACE.
+7. Ejecutar el programa con permisos de administrador o root.
+
+===============================================================================
+
+10. NOTAS TÉCNICAS ADICIONALES
+
+11. Uso de variables de entorno
+
+El uso de .env permite separar la configuración sensible del código fuente. Esto facilita publicar el proyecto sin exponer credenciales.
+
+2. Uso de lista blanca
+
+La lista blanca permite definir qué dispositivos son autorizados dentro de la red. Si un dispositivo no aparece en la lista, el sistema puede generar una alerta.
+
+3. Uso de lista negra
+
+La lista negra permite detectar conexiones hacia IPs consideradas peligrosas. Esta lista puede actualizarse manualmente o con fuentes externas.
+
+4. Bitácoras
+
+Las bitácoras permiten revisar eventos después de la ejecución. Sin embargo, deben protegerse porque pueden contener información técnica de la red.
+
+5. Alertas por correo
+
+El sistema puede enviar alertas al administrador. Para esto se requiere configurar correctamente SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD y ADMIN_EMAIL.
+
+6. Ejecución con privilegios
+
+La captura de paquetes requiere privilegios elevados. En Windows se debe ejecutar PowerShell como Administrador. En Linux se debe utilizar sudo.
+
+7. Uso ético
+
+El IDS debe utilizarse únicamente con autorización. El objetivo del sistema es defensivo, académico y de apoyo al monitoreo institucional.
+
+8. Archivos que no deben subirse a GitHub
+
+* .env
+* logs/
+* reports/
+* **pycache**/
+* archivos .pyc
+
+9. Archivos que sí deben subirse a GitHub
+
+* ids_main.py
+* requirements.txt
+* instalar_windows.bat
+* env.example
+* config/whitelist.csv
+* config/blacklist.txt
+* modules/*.py
+* DOCUMENTACION_SEGURA.txt
+
+===============================================================================
+
+11. REFERENCIAS CONSULTADAS
+
+* Constitución Política de los Estados Unidos Mexicanos. Cámara de Diputados.
+* Ley Federal de Protección de Datos Personales en Posesión de los Particulares. Cámara de Diputados.
+* Código Penal Federal, artículos relacionados con acceso ilícito a sistemas y equipos de informática.
+* Documentación oficial de Python.
+* Documentación de Scapy.
+* Documentación técnica del proyecto IDS Institucional.
+* OpenAI. ChatGPT. Herramienta de apoyo para redacción, organización y documentación técnica del proyecto.
+
+===============================================================================
+
+FIN DE LA DOCUMENTACIÓN SEGURA
+
