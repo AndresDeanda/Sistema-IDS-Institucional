@@ -1,15 +1,3 @@
-"""
-===========================================================
-  MÓDULO: traffic_monitor.py
-  Monitoreo de Sitios Web y Generación de Reportes
-  
-  Descripción:
-    Intercepta consultas DNS y peticiones HTTP/HTTPS
-    para registrar en tiempo real los dominios visitados
-    por cada host de la red. Genera bitácoras y reportes
-    en formato CSV y HTML. Opera en Capa 7 (Aplicación).
-===========================================================
-"""
 
 import csv
 import logging
@@ -19,66 +7,37 @@ from datetime    import datetime
 from pathlib     import Path
 
 
+# [MOD-005]
 class ModuloMonitoreoTrafico:
-    """
-    Registra dominios visitados por usuarios de la red.
-    Genera reportes en tiempo real (CSV + HTML).
-    """
 
+    # [MOD-005.1]
     def __init__(self, ruta_reporte: str, alertas, logger: logging.Logger):
-        """
-        Inicializa el monitor de tráfico.
-
-        Parámetros:
-            ruta_reporte : Directorio donde se guardan los reportes.
-            alertas      : Instancia de ModuloAlertas.
-            logger       : Logger del sistema.
-        """
         self.ruta_reporte = Path(ruta_reporte)
         self.alertas      = alertas
         self.log          = logger
         self._lock        = threading.Lock()
 
-        # Historial de navegación: {ip: [{dominio, timestamp, protocolo}, ...]}
         self._historial: dict[str, list[dict]] = defaultdict(list)
 
-        # Contador global de peticiones por dominio
         self._contador_dominios: dict[str, int] = defaultdict(int)
 
-        # Crear directorio de reportes
         self.ruta_reporte.mkdir(parents=True, exist_ok=True)
 
-        # Nombre del archivo de bitácora del día actual
         self._archivo_bitacora = self.ruta_reporte / f"bitacora_{datetime.now().strftime('%Y%m%d')}.csv"
         self._inicializar_bitacora()
 
         self.log.info(f"[MONITOR] Módulo de monitoreo iniciado. Reportes en: {self.ruta_reporte}")
 
-    # ── Registro de tráfico ───────────────────────────────────────────────────
-
+    # [MOD-005.2]
     def registrar_consulta_dns(self, ip_origen: str, dominio: str):
-        """
-        Registra una consulta DNS (resolución de nombre de dominio).
-
-        Parámetros:
-            ip_origen : IP del host que realiza la consulta.
-            dominio   : Nombre de dominio consultado.
-        """
         self._registrar(ip_origen, dominio, "DNS")
 
+    # [MOD-005.3]
     def registrar_peticion_http(self, ip_origen: str, host: str, metodo: str = "GET"):
-        """
-        Registra una petición HTTP (capa de aplicación).
-
-        Parámetros:
-            ip_origen : IP del host origen.
-            host      : Nombre del host HTTP (cabecera Host:).
-            metodo    : Método HTTP (GET, POST, etc.).
-        """
         self._registrar(ip_origen, host, f"HTTP/{metodo}")
 
+    # [MOD-005.4]
     def _registrar(self, ip: str, dominio: str, protocolo: str):
-        """Método interno que persiste el evento en memoria y en la bitácora."""
         timestamp = datetime.now()
         entrada = {
             "timestamp" : timestamp.strftime("%Y-%m-%d %H:%M:%S"),
@@ -92,19 +51,17 @@ class ModuloMonitoreoTrafico:
 
         self.log.debug(f"[MONITOR] {ip} → {dominio} ({protocolo})")
 
-    # ── Bitácora CSV ──────────────────────────────────────────────────────────
-
+    # [MOD-005.5]
     def _inicializar_bitacora(self):
-        """Crea el encabezado del CSV si el archivo no existe."""
         if not self._archivo_bitacora.exists():
             with open(self._archivo_bitacora, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow(["timestamp", "ip_origen", "dominio", "protocolo"])
             self.log.info(f"[MONITOR] Bitácora iniciada: {self._archivo_bitacora}")
 
+    # [MOD-005.6]
     def _escribir_en_bitacora(self, ip: str, dominio: str, protocolo: str,
                                timestamp: datetime):
-        """Escribe una línea en la bitácora CSV."""
         try:
             with open(self._archivo_bitacora, "a", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
@@ -115,13 +72,8 @@ class ModuloMonitoreoTrafico:
         except Exception as e:
             self.log.error(f"[MONITOR] Error escribiendo bitácora: {e}")
 
-    # ── Generación de Reporte HTML ────────────────────────────────────────────
-
+    # [MOD-005.7]
     def generar_reporte_html(self) -> Path:
-        """
-        Genera un reporte HTML con el resumen del tráfico del día.
-        Retorna la ruta del archivo generado.
-        """
         fecha_str    = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         nombre_arch  = f"reporte_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
         ruta_archivo = self.ruta_reporte / nombre_arch
@@ -134,11 +86,11 @@ class ModuloMonitoreoTrafico:
                 reverse=True
             )[:20]
 
-        # ── Construir tabla por host ─────────────────────────────────────────
+        # [MOD-005.7.1]
         filas_hosts = ""
         for ip, visitas in historial_copia.items():
             filas_hosts += f'<tr class="host-row"><td colspan="3"><strong>🖥 {ip}</strong></td></tr>\n'
-            for visita in visitas[-50:]:  # Últimas 50 por host
+            for visita in visitas[-50:]:
                 filas_hosts += (
                     f'<tr>'
                     f'<td>{visita["timestamp"]}</td>'
@@ -147,7 +99,7 @@ class ModuloMonitoreoTrafico:
                     f'</tr>\n'
                 )
 
-        # ── Construir tabla top dominios ─────────────────────────────────────
+        # [MOD-005.7.2]
         filas_top = "".join(
             f'<tr><td>{d}</td><td>{c}</td></tr>\n'
             for d, c in top_dominios
@@ -218,8 +170,8 @@ class ModuloMonitoreoTrafico:
 
         return ruta_archivo
 
+    # [MOD-005.8]
     def obtener_resumen(self) -> dict:
-        """Retorna un resumen del tráfico para uso interno."""
         with self._lock:
             return {
                 "total_hosts"    : len(self._historial),
