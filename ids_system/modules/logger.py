@@ -1,15 +1,3 @@
-"""
-===========================================================
-  MÓDULO: logger.py
-  Configuración del Sistema de Bitácoras
-  
-  Descripción:
-    Configura el logger centralizado del IDS. Escribe
-    simultáneamente a consola (coloreada) y a archivo
-    rotativo (.log). Los archivos rotan a 5 MB con
-    respaldo de 7 días para auditoría.
-===========================================================
-"""
 
 import logging
 import logging.handlers
@@ -17,68 +5,64 @@ import sys
 from pathlib import Path
 
 
-# Colores ANSI para consola
+# [MOD-009.1]
 COLORES = {
-    "DEBUG"   : "\033[36m",   # Cyan
-    "INFO"    : "\033[32m",   # Verde
-    "WARNING" : "\033[33m",   # Amarillo
-    "ERROR"   : "\033[31m",   # Rojo
-    "CRITICAL": "\033[35m",   # Magenta
-    "RESET"   : "\033[0m",
+    "DEBUG": "\033[36m",
+    "INFO": "\033[32m",
+    "WARNING": "\033[33m",
+    "ERROR": "\033[31m",
+    "CRITICAL": "\033[35m",
+    "RESET": "\033[0m",
 }
 
 
+# [MOD-009.2]
 class FormateadorColor(logging.Formatter):
-    """Formateador con colores ANSI para salida en consola."""
 
     FORMATO = "[%(asctime)s] [%(levelname)-8s] %(message)s"
-    FECHA   = "%H:%M:%S"
+    FECHA = "%H:%M:%S"
 
+    # [MOD-009.3]
     def format(self, record: logging.LogRecord) -> str:
-        color  = COLORES.get(record.levelname, COLORES["RESET"])
-        reset  = COLORES["RESET"]
-        fmt    = logging.Formatter(
-            f"{color}{self.FORMATO}{reset}", datefmt=self.FECHA
+        color = COLORES.get(record.levelname, COLORES["RESET"])
+        reset = COLORES["RESET"]
+        fmt = logging.Formatter(
+            f"{color}{self.FORMATO}{reset}",
+            datefmt=self.FECHA
         )
         return fmt.format(record)
 
 
-def configurar_logger(nombre: str, ruta_log: str,
-                       nivel: int = logging.INFO) -> logging.Logger:
-    """
-    Crea y configura un logger con doble salida:
-    consola coloreada + archivo rotativo.
+# [MOD-009.4]
+def configurar_logger(
+    nombre: str,
+    ruta_log: str,
+    nivel: int = logging.INFO
+) -> logging.Logger:
 
-    Parámetros:
-        nombre   : Nombre del logger (ej. 'IDS_PRINCIPAL').
-        ruta_log : Directorio donde guardar los archivos .log.
-        nivel    : Nivel mínimo de logging (default: INFO).
-
-    Retorna el logger configurado.
-    """
     Path(ruta_log).mkdir(parents=True, exist_ok=True)
     ruta_archivo = Path(ruta_log) / "ids.log"
 
     logger = logging.getLogger(nombre)
     logger.setLevel(nivel)
 
-    # Evitar duplicar handlers si se llama múltiples veces
+    # [MOD-009.5]
     if logger.handlers:
         return logger
 
-    # ── Handler de consola con colores ───────────────────────────────────────
+    # [MOD-009.6]
     handler_consola = logging.StreamHandler(sys.stdout)
     handler_consola.setLevel(nivel)
     handler_consola.setFormatter(FormateadorColor())
 
-    # ── Handler de archivo rotativo ──────────────────────────────────────────
+    # [MOD-009.7]
     handler_archivo = logging.handlers.RotatingFileHandler(
-        filename    = ruta_archivo,
-        maxBytes    = 5 * 1024 * 1024,   # 5 MB por archivo
-        backupCount = 7,                  # 7 archivos de respaldo
-        encoding    = "utf-8"
+        filename=ruta_archivo,
+        maxBytes=5 * 1024 * 1024,
+        backupCount=7,
+        encoding="utf-8"
     )
-    handler_archivo.setLevel(logging.DEBUG)  # Guardar TODO en archivo
+    handler_archivo.setLevel(logging.DEBUG)
     handler_archivo.setFormatter(
         logging.Formatter(
             "[%(asctime)s] [%(levelname)-8s] [%(threadName)s] %(message)s",
@@ -86,7 +70,9 @@ def configurar_logger(nombre: str, ruta_log: str,
         )
     )
 
+    # [MOD-009.8]
     logger.addHandler(handler_consola)
     logger.addHandler(handler_archivo)
 
     return logger
+
