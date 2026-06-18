@@ -1,19 +1,3 @@
-"""
-===========================================================
-  MÓDULO: packet_capture.py
-  Captura de Paquetes en Tiempo Real (Motor Principal)
-  
-  Descripción:
-    Núcleo del IDS. Captura paquetes usando Scapy/Npcap
-    y los distribuye a cada módulo de análisis según el
-    tipo de tráfico (ARP, DNS, HTTP, TCP, UDP).
-    Opera en las Capas 2-7 del modelo OSI.
-    
-  Dependencias:
-    - scapy (pip install scapy)
-    - Npcap instalado en Windows (https://npcap.com)
-===========================================================
-"""
 
 import logging
 import threading
@@ -29,25 +13,12 @@ except ImportError:
     SCAPY_DISPONIBLE = False
 
 
+# [MOD-004.1]
 class ModuloCapturaPaquetes:
-    """
-    Motor de captura de paquetes usando Scapy.
-    Distribuye eventos a los módulos de análisis.
-    """
 
+    # [MOD-004.2]
     def __init__(self, interfaz, lista_blanca, threat_intel,
                  monitor_sitios, forense, logger: logging.Logger):
-        """
-        Inicializa el motor de captura.
-
-        Parámetros:
-            interfaz       : Nombre de la interfaz de red (None = auto).
-            lista_blanca   : ModuloListaBlanca.
-            threat_intel   : ModuloThreatIntelligence.
-            monitor_sitios : ModuloMonitoreoTrafico.
-            forense        : ModuloForense.
-            logger         : Logger del sistema.
-        """
         if not SCAPY_DISPONIBLE:
             logger.critical(
                 "[CAPTURA] Scapy no está instalado. "
@@ -67,20 +38,16 @@ class ModuloCapturaPaquetes:
             "http": 0, "tcp": 0, "udp": 0
         }
 
-        # Resolver interfaz automáticamente si no se especificó
         if not self.interfaz:
             self.interfaz = self._detectar_interfaz()
 
-    # ── Inicio y parada ────────────────────────────────────────────────────────
-
+    # [MOD-004.3]
     def iniciar(self):
-        """Inicia la captura bloqueante de paquetes."""
         self._activo = True
         self.log.info(f"[CAPTURA] Sniffing en interfaz: {self.interfaz}")
         print(f"[*] Escuchando en: {self.interfaz}")
         print(f"[*] Estadísticas cada 60 segundos. Ctrl+C para detener.\n")
 
-        # Hilo de estadísticas periódicas
         hilo_stats = threading.Thread(
             target=self._imprimir_estadisticas_periodicas,
             daemon=True,
@@ -88,21 +55,19 @@ class ModuloCapturaPaquetes:
         )
         hilo_stats.start()
 
-        # Iniciar sniff (bloqueante)
         sniff(
             iface  = self.interfaz,
             prn    = self._procesar_paquete,
-            store  = False,          # No almacenar en RAM para eficiencia
+            store  = False,
             stop_filter = lambda _: not self._activo
         )
 
+    # [MOD-004.4]
     def detener(self):
-        """Detiene la captura de paquetes."""
         self._activo = False
         self.log.info(
             f"[CAPTURA] Detenido. Estadísticas finales: {self._contadores}"
         )
-        # Generar reporte final
         try:
             ruta_reporte = self.monitor.generar_reporte_html()
             self.log.info(f"[CAPTURA] Reporte final generado: {ruta_reporte}")
@@ -110,32 +75,27 @@ class ModuloCapturaPaquetes:
         except Exception as e:
             self.log.error(f"[CAPTURA] Error generando reporte final: {e}")
 
-    # ── Procesamiento de paquetes ─────────────────────────────────────────────
-
+    # [MOD-004.5]
     def _procesar_paquete(self, paquete):
-        """
-        Callback principal. Analiza cada paquete capturado
-        y lo distribuye al módulo correspondiente.
-        """
         self._contadores["total"] += 1
 
         try:
-            # ── Capa 2: ARP (Detección de dispositivos en red local) ──────────
+            # [MOD-004.6]
             if paquete.haslayer(ARP):
                 self._analizar_arp(paquete)
 
-            # ── Capa 3/4: IP ──────────────────────────────────────────────────
+            # [MOD-004.7]
             if paquete.haslayer(IP):
                 ip_src = paquete[IP].src
                 ip_dst = paquete[IP].dst
 
-                # Verificar IP origen en lista blanca (solo IPs privadas/locales)
+                # [MOD-004.8]
                 if self._es_ip_privada(ip_src):
                     mac_src = paquete[Ether].src if paquete.haslayer(Ether) else "desconocida"
                     protocolo = "TCP" if paquete.haslayer(TCP) else "UDP" if paquete.haslayer(UDP) else "IP"
                     self.lista_blanca.verificar_y_alertar(ip_src, mac_src, protocolo)
 
-                # Verificar IP destino contra lista negra (IPs externas)
+                # [MOD-004.9]
                 if not self._es_ip_privada(ip_dst):
                     puerto_dst = 0
                     protocolo  = "IP"
@@ -151,43 +111,40 @@ class ModuloCapturaPaquetes:
                     es_peligrosa, datos = self.threat_intel.es_ip_peligrosa(ip_dst)
                     if es_peligrosa:
                         self.threat_intel.verificar_y_alertar(ip_src, ip_dst, protocolo, puerto_dst)
-                        # Lanzar investigación forense en segundo plano
                         self.forense.investigar_ip(
                             ip        = ip_dst,
                             ip_interna= ip_src,
                             categoria = datos.get("categoria", "unknown")
                         )
 
-                # ── Capa 7: DNS ────────────────────────────────────────────────
+                # [MOD-004.10]
                 if paquete.haslayer(DNS) and paquete.haslayer(DNSQR):
                     self._analizar_dns(paquete, ip_src)
 
-                # ── Capa 7: HTTP ───────────────────────────────────────────────
+                # [MOD-004.11]
                 if paquete.haslayer(TCP) and paquete.haslayer(Raw):
                     self._analizar_http(paquete, ip_src)
 
         except Exception as e:
-            # Los errores en paquetes individuales no deben detener el IDS
             self.log.debug(f"[CAPTURA] Error procesando paquete: {e}")
 
+    # [MOD-004.12]
     def _analizar_arp(self, paquete):
-        """Analiza paquetes ARP para detección de dispositivos Capa 2."""
         self._contadores["arp"] += 1
         arp     = paquete[ARP]
         ip_src  = arp.psrc
         mac_src = arp.hwsrc
 
-        if arp.op in (1, 2):  # ARP Request (1) o Reply (2)
+        if arp.op in (1, 2):
             if self._es_ip_privada(ip_src) and ip_src not in ("0.0.0.0", "255.255.255.255"):
                 self.lista_blanca.verificar_y_alertar(
                     ip=ip_src, mac=mac_src, protocolo="ARP"
                 )
 
+    # [MOD-004.13]
     def _analizar_dns(self, paquete, ip_src: str):
-        """Extrae el nombre de dominio de consultas DNS."""
         self._contadores["dns"] += 1
         try:
-            # DNSQR.qname es el nombre de dominio consultado
             dominio = paquete[DNSQR].qname.decode("utf-8", errors="replace").rstrip(".")
             if dominio and len(dominio) > 3:
                 self.monitor.registrar_consulta_dns(ip_src, dominio)
@@ -195,8 +152,8 @@ class ModuloCapturaPaquetes:
         except Exception as e:
             self.log.debug(f"[CAPTURA] Error en DNS: {e}")
 
+    # [MOD-004.14]
     def _analizar_http(self, paquete, ip_src: str):
-        """Extrae el host HTTP de peticiones en texto plano (puerto 80)."""
         try:
             puerto = paquete[TCP].dport
             if puerto != 80:
@@ -206,7 +163,6 @@ class ModuloCapturaPaquetes:
                 return
 
             self._contadores["http"] += 1
-            # Extraer cabecera Host:
             for linea in payload.splitlines():
                 if linea.lower().startswith("host:"):
                     host   = linea.split(":", 1)[1].strip()
@@ -216,48 +172,33 @@ class ModuloCapturaPaquetes:
         except Exception:
             pass
 
-    # ── Utilidades ────────────────────────────────────────────────────────────
-
+    # [MOD-004.15]
     def _es_ip_privada(self, ip: str) -> bool:
-        """
-        Determina si una IP pertenece a rangos privados (RFC 1918)
-        o es loopback/link-local.
-        """
         try:
             partes = list(map(int, ip.split(".")))
             if len(partes) != 4:
                 return False
-            # 10.0.0.0/8
             if partes[0] == 10:
                 return True
-            # 172.16.0.0/12
             if partes[0] == 172 and 16 <= partes[1] <= 31:
                 return True
-            # 192.168.0.0/16
             if partes[0] == 192 and partes[1] == 168:
                 return True
-            # 127.0.0.0/8 loopback
             if partes[0] == 127:
                 return True
-            # 169.254.0.0/16 link-local
             if partes[0] == 169 and partes[1] == 254:
                 return True
         except Exception:
             pass
         return False
 
+    # [MOD-004.16]
     def _detectar_interfaz(self) -> str:
-        """
-        Detecta automáticamente la interfaz de red activa de forma segura.
-        Soporta los formatos legibles de Scapy en Windows y Linux.
-        """
         try:
-            # En Windows, conf.iface de Scapy ya tiene el objeto de la interfaz activa corregido
             if hasattr(conf.iface, "name") and conf.iface.name:
                 self.log.info(f"[CAPTURA] Interfaz activa detectada vía Scapy: {conf.iface.name}")
                 return conf.iface.name
             
-            # Fallback para sistemas Linux o configuraciones estándar
             interfaces = get_if_list()
             activas = [i for i in interfaces if "loopback" not in i.lower() and "lo" != i.lower()]
             
@@ -268,11 +209,10 @@ class ModuloCapturaPaquetes:
         except Exception as e:
             self.log.warning(f"[CAPTURA] No se pudo detectar interfaz automáticamente: {e}")
 
-        # Último recurso: lo que sea que Scapy tenga mapeado por defecto
         return str(conf.iface)
 
+    # [MOD-004.17]
     def _imprimir_estadisticas_periodicas(self):
-        """Imprime estadísticas en consola cada 60 segundos."""
         import time
         while self._activo:
             time.sleep(60)
