@@ -1,17 +1,3 @@
-"""
-===========================================================
-  MÓDULO: threat_intel.py
-  Inteligencia de Amenazas - Detección de IPs Maliciosas
-  
-  Descripción:
-    Carga una lista negra de IPs asociadas a malware,
-    botnets, phishing y otros vectores de ataque.
-    Al detectar conexión hacia una IP de la lista negra,
-    envía una alerta de emergencia al administrador con
-    el tipo de riesgo específico.
-    Puede enriquecerse con la API de AbuseIPDB.
-===========================================================
-"""
 
 import csv
 import json
@@ -23,7 +9,7 @@ from datetime import datetime
 from pathlib  import Path
 
 
-# ── Categorías de riesgo para clasificación de amenazas ─────────────────────
+# [MOD-006.1]
 CATEGORIAS_RIESGO = {
     "botnet"   : "🔴 CRÍTICO - Botnet/C2 Server",
     "malware"  : "🔴 CRÍTICO - Distribución de Malware",
@@ -37,38 +23,24 @@ CATEGORIAS_RIESGO = {
 }
 
 
+# [MOD-006.2]
 class ModuloThreatIntelligence:
-    """
-    Detecta conexiones hacia IPs de listas negras de amenazas.
-    Soporta formato TXT simple y CSV con categorías.
-    """
 
+    # [MOD-006.3]
     def __init__(self, ruta_blacklist: str, alertas, logger: logging.Logger):
-        """
-        Inicializa el módulo de threat intelligence.
-
-        Parámetros:
-            ruta_blacklist : Ruta al archivo de lista negra (.txt o .csv).
-            alertas        : Instancia de ModuloAlertas.
-            logger         : Logger del sistema.
-        """
         self.ruta_blacklist = Path(ruta_blacklist)
         self.alertas        = alertas
         self.log            = logger
         self._lock          = threading.Lock()
 
-        # Diccionario: {ip: {"categoria": str, "descripcion": str}}
         self._ips_peligrosas: dict[str, dict] = {}
 
-        # Control de alertas enviadas para no hacer spam
         self._alertas_enviadas: set[str] = set()
 
         self._cargar_blacklist()
 
-    # ── Carga de lista negra ──────────────────────────────────────────────────
-
+    # [MOD-006.4]
     def _cargar_blacklist(self):
-        """Carga la lista negra desde archivo. Soporta .txt y .csv."""
         if not self.ruta_blacklist.exists():
             self.log.warning(f"[THREAT] Blacklist no encontrada: {self.ruta_blacklist}")
             self._crear_blacklist_ejemplo()
@@ -84,8 +56,8 @@ class ModuloThreatIntelligence:
 
         self.log.info(f"[THREAT] Lista negra cargada: {len(self._ips_peligrosas)} IPs peligrosas.")
 
+    # [MOD-006.5]
     def _cargar_csv(self):
-        """Carga blacklist en formato CSV con columnas: ip, categoria, descripcion."""
         try:
             with open(self.ruta_blacklist, "r", encoding="utf-8") as f:
                 reader = csv.DictReader(f)
@@ -102,20 +74,18 @@ class ModuloThreatIntelligence:
         except Exception as e:
             self.log.error(f"[THREAT] Error leyendo CSV: {e}")
 
+    # [MOD-006.6]
     def _cargar_txt(self):
-        """Carga blacklist en formato TXT: una IP por línea, comentarios con #."""
         try:
             with open(self.ruta_blacklist, "r", encoding="utf-8") as f:
                 for linea in f:
                     linea = linea.strip()
                     if not linea or linea.startswith("#"):
                         continue
-                    # Soporte para formato: "IP # categoria descripcion"
                     partes = linea.split("#", 1)
                     ip     = partes[0].strip()
                     meta   = partes[1].strip() if len(partes) > 1 else ""
                     if ip:
-                        # Intentar extraer categoría del comentario
                         cat = "unknown"
                         for c in CATEGORIAS_RIESGO:
                             if c in meta.lower():
@@ -129,36 +99,19 @@ class ModuloThreatIntelligence:
         except Exception as e:
             self.log.error(f"[THREAT] Error leyendo TXT: {e}")
 
+    # [MOD-006.7]
     def recargar(self):
-        """Recarga la lista negra en caliente."""
         self.log.info("[THREAT] Recargando lista negra...")
         self._cargar_blacklist()
 
-    # ── Verificación de amenazas ──────────────────────────────────────────────
-
+    # [MOD-006.8]
     def es_ip_peligrosa(self, ip: str) -> tuple[bool, dict]:
-        """
-        Verifica si una IP está en la lista negra.
-
-        Retorna:
-            (True, datos_amenaza) si es peligrosa.
-            (False, {}) si es segura.
-        """
         datos = self._ips_peligrosas.get(ip, {})
         return bool(datos), datos
 
+    # [MOD-006.9]
     def verificar_y_alertar(self, ip_interna: str, ip_externa: str,
                              protocolo: str = "TCP", puerto: int = 0):
-        """
-        Verifica si ip_externa está en la lista negra.
-        Si sí, envía alerta de emergencia.
-
-        Parámetros:
-            ip_interna : IP del host interno que inició la conexión.
-            ip_externa : IP de destino a verificar contra la blacklist.
-            protocolo  : Protocolo de red (TCP/UDP).
-            puerto     : Puerto de destino.
-        """
         es_peligrosa, datos = self.es_ip_peligrosa(ip_externa)
         clave = f"{ip_interna}->{ip_externa}"
 
@@ -171,9 +124,9 @@ class ModuloThreatIntelligence:
             )
             self._enviar_alerta_emergencia(ip_interna, ip_externa, protocolo, puerto, datos)
 
+    # [MOD-006.10]
     def _enviar_alerta_emergencia(self, ip_interna: str, ip_externa: str,
                                    protocolo: str, puerto: int, datos: dict):
-        """Envía correo de ALERTA DE EMERGENCIA al administrador."""
         timestamp   = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         riesgo      = datos.get("riesgo_label", CATEGORIAS_RIESGO["unknown"])
         categoria   = datos.get("categoria", "unknown")
@@ -217,18 +170,8 @@ Sistema IDS Institucional v1.0 | GNU/GPL v3
 """
         self.alertas.enviar(asunto=asunto, cuerpo=cuerpo)
 
-    # ── Integración con AbuseIPDB ─────────────────────────────────────────────
-
+    # [MOD-006.11]
     def consultar_abuseipdb(self, ip: str, api_key: str) -> dict:
-        """
-        Consulta la API de AbuseIPDB para obtener información de abuso.
-
-        Parámetros:
-            ip      : IP a consultar.
-            api_key : Clave de API de AbuseIPDB.
-
-        Retorna diccionario con datos de abuso o dict vacío si falla.
-        """
         if not api_key:
             self.log.debug("[THREAT] Sin API key de AbuseIPDB, omitiendo consulta.")
             return {}
@@ -248,10 +191,8 @@ Sistema IDS Institucional v1.0 | GNU/GPL v3
             self.log.warning(f"[THREAT] Error consultando AbuseIPDB para {ip}: {e}")
         return {}
 
-    # ── Utilidades ────────────────────────────────────────────────────────────
-
+    # [MOD-006.12]
     def _crear_blacklist_ejemplo(self):
-        """Crea un archivo de ejemplo con IPs peligrosas conocidas."""
         self.ruta_blacklist.parent.mkdir(parents=True, exist_ok=True)
         try:
             with open(self.ruta_blacklist, "w", encoding="utf-8") as f:
